@@ -7,6 +7,7 @@ from app.schemas.auth import UserCreate
 from app.schemas.validators import UserLogin,Token
 from app.core.security import get_password_hash,verify_password
 from app.services.jwt import create_access_token,create_refresh_token
+from datetime import timedelta
 
 async def authenticate_user(db: AsyncSession, email: str, password: str):
     result = await db.execute(select(User).filter(User.email == email))
@@ -22,14 +23,23 @@ async def authenticate_user(db: AsyncSession, email: str, password: str):
 
 
 async def login_user(db: AsyncSession, user_login: UserLogin) -> Token:
-    user = await authenticate_user(db, user_login.email, user_login.password)  # Pass db first
+
+    user = await authenticate_user(db, user_login.email, user_login.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
     token_data = {
         "sub": str(user.id),
         "email": user.email,
         "role": user.role.value
     }
-    access_token = create_access_token(data=token_data)
-    refresh_token = create_refresh_token(data=token_data)  
+
+    expires_delta_access = timedelta(hours=1) 
+    expires_delta_refresh = timedelta(days=7)  
+
+    access_token = create_access_token(data=token_data, role=user.role.value, expires_delta=expires_delta_access)
+    refresh_token = create_refresh_token(data=token_data, expires_delta=expires_delta_refresh)
     
     return Token(access_token=access_token, token_type="bearer", refresh_token=refresh_token)
 
