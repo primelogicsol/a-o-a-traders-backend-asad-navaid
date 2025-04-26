@@ -13,7 +13,7 @@ import os
 
 
 ALGORITHM = "HS256"
-SECRET_KEY = os.getenv("SECRET_KEY")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
@@ -35,7 +35,8 @@ def create_access_token(username: str, user_id: int, role: str, expires_delta: t
         "role": role,
         "exp": expire
     }
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
+
 
 
 def create_refresh_token(username: str, user_id: int, role: str, expires_delta: timedelta):
@@ -43,7 +44,7 @@ def create_refresh_token(username: str, user_id: int, role: str, expires_delta: 
 
 
 def decode_token(token: str):
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    return jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
 
 
 async def get_current_user(
