@@ -1,5 +1,5 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-from app.services.jwt import create_access_token
+from app.services.auth.jwt import create_access_token
 from app.core.config import settings
 from datetime import timedelta
 

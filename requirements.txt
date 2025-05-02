@@ -17,3 +17,46 @@ PyPDF2
 pytesseract
 opencv-python
 stripe
+
+
+# Core Framework & Server
+fastapi
+uvicorn[standard]
+
+# Database & ORM
+sqlalchemy
+asyncpg
+alembic
+databases
+
+# Auth & Security
+authlib
+python-jose[cryptography]
+passlib[bcrypt]
+python-dotenv
+itsdangerous
+email-validator
+
+# File Uploads
+aiofiles
+python-multipart
+
+# AI/NLP for Column Mapping
+sentence-transformers
+scikit-learn
+numpy
+
+# Optional: Email Services
+aiohttp
+httpx
+aiosmtplib
+jinja2
+
+# Testing
+pytest
+httpx
+pytest-asyncio
+
+# Excel/CSV Parsing (optional based on use case)
+pandas
+openpyxl

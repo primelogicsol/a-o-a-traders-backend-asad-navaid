@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.validators import RefreshTokenRequest, Token
-from app.services.jwt import token_expired, decode_token, create_access_token, create_refresh_token
+from app.schemas.auth.validators import RefreshTokenRequest, Token
+from app.services.auth.jwt import token_expired, decode_token, create_access_token, create_refresh_token
 from app.core.database import get_db
 from datetime import timedelta
 

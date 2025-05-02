@@ -1,17 +1,20 @@
 from pydantic import BaseModel,EmailStr,field_validator,ValidationInfo
 from enum import Enum
+from app.models.user import UserRole
 
-class UserRole(str,Enum):
-    admin = "admin"
-    supplier = "supplier"
-    buyer = "buyer"
+class StandardResponse(BaseModel):
+    success: bool
+    message: str
+
+class SetUserRoleRequest(BaseModel):
+    email: str
+    role: str
 
 class UserCreate(BaseModel):
     email:EmailStr
     username:str
     password:str
     confirm_password:str
-    role:UserRole=UserRole.buyer
 
     @field_validator("confirm_password")
     @classmethod
