@@ -9,6 +9,8 @@ class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+    user_role:str
+    user_id:int
 
 
 class GoogleUser(BaseModel):

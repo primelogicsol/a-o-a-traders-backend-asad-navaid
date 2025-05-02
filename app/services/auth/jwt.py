@@ -10,7 +10,8 @@ from sqlalchemy.orm import defer
 from app.models.user import User
 from sqlalchemy.ext.asyncio import AsyncSession
 import os
-
+from app.schemas.auth.auth import UserResponse
+from app.core.database import get_db
 
 ALGORITHM = "HS256"
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
@@ -47,42 +48,28 @@ def decode_token(token: str):
     return jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
 
 
-async def get_current_user(
-    db: AsyncSession,
-    token: Annotated[str, Depends(oauth_bearer)]
-):
+async def get_current_user(token: Annotated[str, Depends(oauth_bearer)], db: AsyncSession = Depends(get_db)) -> UserResponse:
     try:
         payload = decode_token(token)
-        username = payload.get("sub")
         user_id = payload.get("id")
-        role = payload.get("role")
+        role = payload.get("role")  
 
-        if not username or not user_id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate user."
-            )
-
-        stmt = select(User).options(
-            defer(User.password), defer(User.google_sub)
-        ).where(User.username == username)
-
+        stmt = select(User).where(User.id == user_id)
         result = await db.execute(stmt)
-        user = result.scalars().first()
-
+        user = result.scalar_one_or_none()
+        
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found."
-            )
+            raise HTTPException(status_code=404, detail="User not found")
+        
 
-        return {"username": username, "user_id": user_id, "role": role, "user": user}
+        return UserResponse.model_validate(user)
 
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token."
-        )
+    except JWTError as e:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    except JWTError as e:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
 
 def token_expired(token: Annotated[str, Depends(oauth_bearer)]):
     try:

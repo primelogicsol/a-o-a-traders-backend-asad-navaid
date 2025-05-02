@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
-from app.services.google_auth import oauth, get_user_by_google_sub, create_user_from_google_info
-from app.schemas.validators import GoogleUser
-from app.services.jwt import create_access_token, create_refresh_token
+from app.services.auth.google_auth import oauth, get_user_by_google_sub, create_user_from_google_info
+from app.schemas.auth.validators import GoogleUser
+from app.services.auth.jwt import create_access_token, create_refresh_token
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from authlib.oauth2.rfc6749 import OAuth2Token
@@ -22,11 +22,11 @@ async def login_google(request: Request):
 @router.get("/callback/google")
 async def auth_google(request: Request, db: AsyncSession = Depends(get_db)):
     try:
-        user_response: OAuth2Token = await oauth.google.authorize_access_token(request)
+        token: OAuth2Token = await oauth.google.authorize_access_token(request)
+        user_info = await oauth.google.parse_id_token(request, token)
     except OAuthError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
 
-    user_info = user_response.get("userinfo")
     google_user = GoogleUser(**user_info)
     existing_user = await get_user_by_google_sub(google_user.sub, db)
 

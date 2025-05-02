@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.user import User
 from app.core.database import get_db
-from app.services.magic_link import send_magic_link
-from app.services.jwt import decode_token, create_access_token, create_refresh_token
+from app.services.auth.magic_link import send_magic_link
+from app.services.auth.jwt import decode_token, create_access_token, create_refresh_token
 
 
 router = APIRouter()

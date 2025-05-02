@@ -1,6 +1,7 @@
 from sqlalchemy import Column,Integer,String,Enum,Boolean
 from app.core.database import Base
 import enum
+from sqlalchemy.orm import relationship
 
 class UserRole(str,enum.Enum):
     admin="admin"
@@ -16,5 +17,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, nullable=False)
     password=Column(String,nullable=True)
-    role = Column(Enum(UserRole), default=UserRole.buyer)
+    role = Column(Enum(UserRole), nullable=False, default=UserRole.buyer)
     is_active = Column(Boolean, default=True)
+    
+    products = relationship("Product", back_populates="supplier") 
