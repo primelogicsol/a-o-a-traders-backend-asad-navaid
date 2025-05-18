@@ -1,43 +1,32 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, Date,ForeignKey
-from app.core.database import Base
+# models/product.py
+import uuid
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text, UUID, Index
 from sqlalchemy.orm import relationship
+from datetime import datetime, timezone
+from app.core.database import Base
 
 class Product(Base):
     __tablename__ = "products"
 
-
     supplier_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    id = Column(Integer, primary_key=True, index=True)
-    part_number = Column(String, nullable=True)
-    your_part_number = Column(String, nullable=True)
-    item_description = Column(String)
-    brand_name = Column(String)
-    vendor_part_number = Column(String, nullable=True)
-    vendor_name = Column(String)
-    product_category = Column(String)
-    product_subcategory = Column(String)
-    upc_code = Column(String)
-    min_order_qty = Column(Integer)
-    min_order_uom = Column(String)
-    uom_conversion = Column(String)
-    cost_uom = Column(String)
-    std_pkg_list_price = Column(Float)
-    std_pkg_cust_cost = Column(Float)
-    price_date = Column(Date)
+    product_id = Column(String,primary_key=True, nullable=False)  # Provided by vendor
+    item_number=Column(String,unique=True)
+    product_name = Column(String, index=True)
+    price = Column(Float)
+    description = Column(Text)
+    brand = Column(Text)
+    category = Column(String)
+    stock_qty = Column(Integer)
     item_weight = Column(Float)
-    item_height = Column(Float)
-    item_width = Column(Float)
-    item_length = Column(Float)
-    item_cube = Column(Float)
-    country_of_origin = Column(String)
-    hazmat_item = Column(Boolean, default=False)
-    special_order_item = Column(Boolean, default=False)
-    state_restricted = Column(Boolean, default=False)
-    recno = Column(Integer, nullable=True)
-    temp_price = Column(Float, nullable=True)
-    promo_price = Column(Float, nullable=True)
-    promo_start_date = Column(Date, nullable=True)
-    promo_end_date = Column(Date, nullable=True)
-    kf = Column(String, nullable=True)
-    
+    keywords=Column(String)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+
     supplier = relationship("User", back_populates="products")
+
+    images = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("ix_supplier_product_id", "supplier_id", "product_id", unique=True),
+    )

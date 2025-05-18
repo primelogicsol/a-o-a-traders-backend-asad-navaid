@@ -1,81 +1,98 @@
-from fastapi import FastAPI
-from dotenv import load_dotenv
-from app.api.version1.route_init import router
-from app.core.database import Base, engine
-import asyncio
+from fastapi import FastAPI, Security
 from fastapi.middleware.cors import CORSMiddleware
-import os
-from starlette.middleware.sessions import SessionMiddleware
-from app.utils.embedding import init_embedding_model
-from app.core.database import init_db
-from contextlib import asynccontextmanager
 from fastapi.security import OAuth2PasswordBearer
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
-from fastapi.openapi.models import OAuthFlowPassword
-from fastapi import Security
+from starlette.middleware.sessions import SessionMiddleware
+from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+import os
+from app.api.version1.route_init import router
+from app.core.database import Base, engine, init_db
 from fastapi.openapi.utils import get_openapi
 
-
+# Load environment variables
 load_dotenv()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-# {"about-product":"item_description","barcode":"upc_code","cost":"cost_uom","manufacturer-name":"brand_name","minimum-qty":"min_order_qty","brand":"brand_name"}
+# Security setup
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_embedding_model()
+    """Async context manager for application lifespan"""
     await init_db()
     yield
 
-
-app = FastAPI(lifespan=lifespan)
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-
-    openapi_schema = get_openapi(
+def create_app() -> FastAPI:
+    """Factory function for creating the FastAPI application"""
+    app = FastAPI(
         title="E-Commerce Platform API",
         version="1.0.0",
-        description="This API powers the bulk product upload system with AI mapping.",
-        routes=app.routes,
+        description="API for Bulk Product Upload System with AI Mapping",
+        lifespan=lifespan,
+        docs_url="/docs",
+        redoc_url="/redoc"
     )
-    openapi_schema["components"]["securitySchemes"] = {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT"
+
+    # Configure OpenAPI schema
+    def custom_openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+
+        openapi_schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            description=app.description,
+            routes=app.routes,
+        )
+
+        # Add security schemes
+        openapi_schema["components"]["securitySchemes"] = {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
         }
-    }
-    for path in openapi_schema["paths"].values():
-        for operation in path.values():
-            operation.setdefault("security", []).append({"BearerAuth": []})
 
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
+        # Apply security to all endpoints
+        for path in openapi_schema["paths"].values():
+            for method in path.values():
+                method.setdefault("security", []).append({"BearerAuth": []})
 
-app.openapi = custom_openapi
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    app.openapi = custom_openapi
 
-async def create_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Add middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-from fastapi import FastAPI
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=os.getenv("SECRET_KEY", "default-secret-key"),
+        session_cookie="session_cookie"
+    )
 
+    # Include routers
+    app.include_router(router)
 
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"))
+    return app
 
-app.include_router(router)
-
-
+# Create application instance
+app = create_app()
 
 if __name__ == "__main__":
-    asyncio.run(create_db())
+    import uvicorn
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        ssl_keyfile=os.getenv("SSL_KEYFILE", None),
+        ssl_certfile=os.getenv("SSL_CERTFILE", None)
+    )

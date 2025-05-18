@@ -45,7 +45,7 @@ async def login_user(db: AsyncSession, user_login: UserLogin) -> Token:
         expires_delta=expires_delta_refresh
     )
     
-    return Token(access_token=access_token, token_type="bearer", refresh_token=refresh_token, user_role=user.role.value,  # <<< added this
+    return Token(access_token=access_token, token_type="bearer", refresh_token=refresh_token, user_role=user.role.value,
         user_id=user.id )
 
 

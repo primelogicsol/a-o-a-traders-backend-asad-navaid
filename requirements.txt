@@ -41,10 +41,6 @@ email-validator
 aiofiles
 python-multipart
 
-# AI/NLP for Column Mapping
-sentence-transformers
-scikit-learn
-numpy
 
 # Optional: Email Services
 aiohttp
@@ -52,11 +48,8 @@ httpx
 aiosmtplib
 jinja2
 
-# Testing
-pytest
-httpx
-pytest-asyncio
 
-# Excel/CSV Parsing (optional based on use case)
+
+# Excel/CSV Parsing 
 pandas
 openpyxl

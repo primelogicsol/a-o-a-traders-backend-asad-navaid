@@ -37,5 +37,6 @@ async def magic_login_verify(request: Request):
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "user_role": user_data["role"]
     }
