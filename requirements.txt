@@ -41,11 +41,13 @@ python-multipart
 
 numpy
 
+
 # Optional: Email Services
 aiohttp
 httpx
 aiosmtplib
 jinja2
+
 
 # Excel/CSV Parsing 
 pandas

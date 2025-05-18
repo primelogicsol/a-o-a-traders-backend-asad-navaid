@@ -19,13 +19,19 @@ FRONTEND_URL = os.getenv("FRONTEND_URL")
 async def login_google(request: Request):
     return await oauth.google.authorize_redirect(request, GOOGLE_REDIRECT_URI)
 
+from authlib.integrations.base_client.errors import OAuthError
+import traceback
+
 @router.get("/callback/google")
 async def auth_google(request: Request, db: AsyncSession = Depends(get_db)):
     try:
         token: OAuth2Token = await oauth.google.authorize_access_token(request)
+        print("Token:", token)
         user_info = await oauth.google.parse_id_token(request, token)
-    except OAuthError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+        print("User Info:", user_info)
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
 
     google_user = GoogleUser(**user_info)
     existing_user = await get_user_by_google_sub(google_user.sub, db)
