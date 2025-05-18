@@ -6,8 +6,6 @@ python-multipart
 passlib[bcrypt]
 email-validator
 pandas
-sentence-transformers
-scikit-learn
 mysql-connector-python
 python-jose[cryptography]
 python-dotenv
@@ -16,7 +14,7 @@ python-magic
 PyPDF2
 pytesseract
 opencv-python
-stripe
+
 
 
 # Core Framework & Server
@@ -41,13 +39,14 @@ email-validator
 aiofiles
 python-multipart
 
+numpy
+
 
 # Optional: Email Services
 aiohttp
 httpx
 aiosmtplib
 jinja2
-
 
 
 # Excel/CSV Parsing 
