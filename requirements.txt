@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 authlib==1.5.2
 fastapi==0.115.12
 fastapi_mail==1.4.2
@@ -10,3 +11,59 @@ python_jose==3.4.0
 SQLAlchemy==2.0.41
 starlette==0.46.2
 uvicorn==0.34.2
+=======
+fastapi
+uvicorn
+sqlalchemy
+pydantic[dotenv]
+python-multipart
+passlib[bcrypt]
+email-validator
+pandas
+mysql-connector-python
+python-jose[cryptography]
+python-dotenv
+aiofiles
+python-magic
+PyPDF2
+pytesseract
+opencv-python
+
+
+
+# Core Framework & Server
+fastapi
+uvicorn[standard]
+
+# Database & ORM
+sqlalchemy
+asyncpg
+alembic
+databases
+
+# Auth & Security
+authlib
+python-jose[cryptography]
+passlib[bcrypt]
+python-dotenv
+itsdangerous
+email-validator
+
+# File Uploads
+aiofiles
+python-multipart
+
+numpy
+
+
+# Optional: Email Services
+aiohttp
+httpx
+aiosmtplib
+jinja2
+
+
+# Excel/CSV Parsing 
+pandas
+openpyxl
+>>>>>>> deffd4acfc6d71e0efbb368509a24ac88b818395
