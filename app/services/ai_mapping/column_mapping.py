@@ -26,9 +26,10 @@ RULES:
 4. Use date-like values for timestamp fields.
 5. Do NOT map the same source column to more than one target field. Each source column must appear only once in the entire mapping.
 6. Skip mapping and output of `supplier_id`.
-7. If source column name has sheet prefix like `SheetName.ColumnName`, return only `ColumnName` (remove sheet name).
-8. Ensure `"created_at"` and `"updated_at"` are mapped to different timestamp columns if available. If only one exists, assign it to `"created_at"` and leave `"updated_at"` as `null`.
-9. Always include a `product_id` column as the identifier (shared or inferred).
+7. Skip mapping and output of column `item_number`.
+8. If source column name has sheet prefix like `SheetName.ColumnName`, return only `ColumnName` (remove sheet name).
+9. Ensure `"created_at"` and `"updated_at"` are mapped to different timestamp columns if available. If only one exists, assign it to `"created_at"` and leave `"updated_at"` as `null`.
+10. Always include a `product_id` column as the identifier (shared or inferred).
 
 RETURN FORMAT:
 A flat JSON like:
@@ -56,6 +57,7 @@ Respond only with the final JSON. No explanation.
             final_mapping[k] = v
             seen_values.add(v)
 
+    print(final_mapping)
     return final_mapping
 
 

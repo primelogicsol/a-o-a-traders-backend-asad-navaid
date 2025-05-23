@@ -9,8 +9,7 @@ class Product(Base):
     __tablename__ = "products"
 
     supplier_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    product_id = Column(String,primary_key=True, nullable=False)  # Provided by vendor
-    item_number=Column(String,unique=True)
+    product_id = Column(String,primary_key=True, nullable=False) 
     product_name = Column(String, index=True)
     price = Column(Float)
     description = Column(Text)
@@ -20,9 +19,8 @@ class Product(Base):
     item_weight = Column(Float)
     keywords=Column(String)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
-
+    # created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+   
     supplier = relationship("User", back_populates="products")
 
     images = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")

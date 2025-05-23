@@ -5,7 +5,7 @@ from app.core.database import Base
 class ProductImage(Base):
     __tablename__ = "product_images"
 
-    product_id = Column(String, ForeignKey("products.product_id"), primary_key=True)
+    product_id = Column(String, ForeignKey("products.product_id"), primary_key=True, index=True)
 
     main_image = Column(String, nullable=True)
     image_variant1 = Column(String, nullable=True)

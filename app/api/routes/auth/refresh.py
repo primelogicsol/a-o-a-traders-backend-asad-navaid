@@ -16,7 +16,8 @@ async def refresh_access_token(refresh_token_request: RefreshTokenRequest, db: A
 
     user = decode_token(token)
 
-    access_token = create_access_token(user["sub"], user["id"], timedelta(days=7))
-    refresh_token = create_refresh_token(user["sub"], user["id"], timedelta(days=14))
+    access_token = create_access_token(user["sub"],user["role"], user["id"], timedelta(days=7))
+    refresh_token = create_refresh_token(user["sub"],user["role"], user["id"], timedelta(days=14))
 
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer","user_role": user["role"],  
+    "user_id": user["id"]}

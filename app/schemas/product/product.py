@@ -29,9 +29,7 @@ class ProductResponse(ProductBase):
     item_weight: Optional[float] = None
     keywords: Optional[str] = None
     is_active: bool = True
-    created_at: datetime
-    updated_at: datetime
-    images: List[ProductImageRead] = []  # <-- Add this line
+    images: List[ProductImageRead] = [] 
 
     model_config = {
         "from_attributes": True
