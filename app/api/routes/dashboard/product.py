@@ -6,6 +6,7 @@ from sqlalchemy.orm import selectinload
 from typing import Optional
 from sqlalchemy import insert,update
 from app.core.database import get_db
+from app.core.role import role_required
 from app.models.product import Product
 from app.models.product_image import ProductImage
 from app.schemas.product.product import (
@@ -28,7 +29,7 @@ async def get_products(
     min_price: Optional[float] = Query(None, ge=0),
     max_price: Optional[float] = Query(None, ge=0),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(role_required("supplier"))
 ):
 
     from sqlalchemy import exists, select as subselect
@@ -87,7 +88,7 @@ async def get_products(
             "per_page": per_page
         }
     
-    query = query.order_by(Product.updated_at.desc()).offset((page - 1) * per_page).limit(per_page)
+    query = query.offset((page - 1) * per_page).limit(per_page)
     products = (await db.execute(query)).scalars().all()
     
     return {
@@ -102,7 +103,7 @@ async def get_products(
 async def get_product(
     product_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(role_required("supplier"))
 ):
 
     query = (
@@ -134,70 +135,12 @@ async def get_product(
     
     return product
 
-@router.post("/", response_model=ProductResponse)
-async def create_product(
-    product: ProductCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    existing = await db.execute(
-        select(Product).where(Product.product_id == product.product_id)
-    )
-    if existing.scalar():
-        raise HTTPException(status_code=400, detail="Product ID already exists")
-    
-    stmt = insert(Product).values(
-        **product.model_dump(),
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow()
-    )
-    await db.execute(stmt)
-    await db.commit()
-    
-    new_product = await db.execute(
-        select(Product)
-        .where(Product.product_id == product.product_id)
-        .options(selectinload(Product.images))
-    )
-    return new_product.scalar()
-
-@router.put("/{product_id}", response_model=ProductResponse)
-async def update_product(
-    product_id: str,
-    product_update: ProductUpdate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    
-    existing = await db.execute(
-        select(Product).where(Product.product_id == product_id)
-    )
-    if not existing.scalar():
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    update_data = product_update.model_dump(exclude_unset=True)
-    update_data['updated_at'] = datetime.utcnow()
-    
-    stmt = (
-        update(Product)
-        .where(Product.product_id == product_id)
-        .values(**update_data)
-    )
-    await db.execute(stmt)
-    await db.commit()
-    
-    updated_product = await db.execute(
-        select(Product)
-        .where(Product.product_id == product_id)
-        .options(selectinload(Product.images))
-    )
-    return updated_product.scalar()
 
 @router.delete("/{product_id}")
 async def delete_product(
     product_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(role_required("supplier"))
 ):
     existing = await db.execute(
         select(Product).where(Product.product_id == product_id)
