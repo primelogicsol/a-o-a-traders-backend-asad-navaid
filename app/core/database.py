@@ -1,4 +1,3 @@
-# app/core/database.py
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
@@ -8,7 +7,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://avnadmin:AVNS_fI2w76wnqMCXtu0y6hu@pg-20bb4070-asadnavaid704-5e20.j.aivencloud.com:27427/defaultdb"
+    "postgresql+asyncpg://avnadmin:AVNS_tWbhwhGpYy3KkIqaapo@aoa-traders-unzilakhan1973-4de3.c.aivencloud.com:19578/defaultdb"
 )
 
 # Create async engine with connection pool settings

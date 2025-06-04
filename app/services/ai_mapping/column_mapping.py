@@ -57,7 +57,6 @@ Respond only with the final JSON. No explanation.
             final_mapping[k] = v
             seen_values.add(v)
 
-    print(final_mapping)
     return final_mapping
 
 
