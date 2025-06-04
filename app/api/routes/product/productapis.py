@@ -24,36 +24,11 @@ async def get_products(
     max_price: Optional[float] = Query(None, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
-
-    from sqlalchemy import exists, select as subselect
-    
-    has_main_image = (
-        subselect(1)
-        .where(
-            and_(
-                ProductImage.product_id == Product.product_id,
-                ProductImage.main_image.isnot(None)
-            )
-        )
-        .exists()
-        .label("has_main_image")
-    )
-    
     query = (
         select(Product)
-        .join(ProductImage, Product.product_id == ProductImage.product_id)
-        .where(
-            and_(
-                Product.is_active == True,
-                Product.product_name.isnot(None),
-                Product.price.isnot(None),
-                ProductImage.main_image.isnot(None)
-            )
-        )
-        .options(
-            # Load all image data
-            selectinload(Product.images)
-        )
+        .join(ProductImage, Product.product_id == ProductImage.product_id, isouter=True)
+        .where(Product.is_active == True)
+        .options(selectinload(Product.images))
     )
 
     if search:
@@ -68,10 +43,10 @@ async def get_products(
         query = query.where(Product.price >= min_price)
     if max_price is not None:
         query = query.where(Product.price <= max_price)
-    
+
     total_query = select(func.count()).select_from(query.alias())
     total = (await db.execute(total_query)).scalar()
-    
+
     if total == 0:
         return {
             "items": [],
@@ -80,10 +55,10 @@ async def get_products(
             "pages": 0,
             "per_page": per_page
         }
-    
+
     query = query.offset((page - 1) * per_page).limit(per_page)
     products = (await db.execute(query)).scalars().all()
-    
+
     return {
         "items": products,
         "total": total,
@@ -92,12 +67,12 @@ async def get_products(
         "per_page": per_page
     }
 
+
 @router.get("/{product_id}", response_model=ProductResponse)
 async def get_product(
     product_id: str,
     db: AsyncSession = Depends(get_db),
 ):
-
     query = (
         select(Product)
         .where(
@@ -106,24 +81,15 @@ async def get_product(
                 Product.is_active == True
             )
         )
-        .options(
-            selectinload(Product.images)
-        )
+        .options(selectinload(Product.images))
     )
     
     result = await db.execute(query)
     product = result.scalar_one_or_none()
-    
+
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    
-    has_images = product.images and any(img.main_image for img in product.images)
-    
-    if not product.product_name or not product.price or not has_images:
-        raise HTTPException(
-            status_code=404, 
-            detail="Product does not have complete data"
-        )
-    
+
     return product
+
 
