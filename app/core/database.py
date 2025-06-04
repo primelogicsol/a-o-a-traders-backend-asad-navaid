@@ -6,20 +6,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+asyncpg://avnadmin:AVNS_tWbhwhGpYy3KkIqaapo@aoa-traders-unzilakhan1973-4de3.c.aivencloud.com:19578/defaultdb"
+    "DATABASE_URL"
 )
 
-# Create async engine with connection pool settings
 engine = create_async_engine(
     DATABASE_URL,
-    pool_size=20,        # Default is 5
-    max_overflow=30,     # Default is 10
+    pool_size=20,        
+    max_overflow=30,     
     pool_timeout=30,
     pool_recycle=3600
 )
 
-# Configure session factory
 AsyncSessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
