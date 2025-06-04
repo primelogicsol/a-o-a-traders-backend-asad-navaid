@@ -51,12 +51,16 @@ async def login_user(db: AsyncSession, user_login: UserLogin) -> Token:
 
 async def register_user(db: AsyncSession, user_data: UserCreate):
  try:
-    result = await db.execute(select(User).filter(User.email == user_data.email))
-    existing_user = result.scalar()
+    result = await db.execute(
+        select(User).where((User.email == user_data.email) | (User.username == user_data.username))
+    )
+    existing_user = result.scalar_one_or_none()
 
-    
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        if existing_user.email == user_data.email:
+            raise HTTPException( detail="Email already registered")
+        if existing_user.username == user_data.username:
+            raise HTTPException( detail="Username already taken")
     
     hashed_pw = get_password_hash(user_data.password)
 
@@ -77,12 +81,16 @@ async def register_user(db: AsyncSession, user_data: UserCreate):
 
 async def register_supplier(db: AsyncSession, user_data: UserCreate):
  try:
-    result = await db.execute(select(User).filter(User.email == user_data.email))
-    existing_user = result.scalar()
+    result = await db.execute(
+        select(User).where((User.email == user_data.email) | (User.username == user_data.username))
+    )
+    existing_user = result.scalar_one_or_none()
 
-    
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        if existing_user.email == user_data.email:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        if existing_user.username == user_data.username:
+            raise HTTPException(status_code=400, detail="Username already taken")
     
     hashed_pw = get_password_hash(user_data.password)
 
@@ -103,12 +111,16 @@ async def register_supplier(db: AsyncSession, user_data: UserCreate):
 
 async def register_admin(db: AsyncSession, user_data: UserCreate):
  try:
-    result = await db.execute(select(User).filter(User.email == user_data.email))
-    existing_user = result.scalar()
+    result = await db.execute(
+        select(User).where((User.email == user_data.email) | (User.username == user_data.username))
+    )
+    existing_user = result.scalar_one_or_none()
 
-    
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        if existing_user.email == user_data.email:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        if existing_user.username == user_data.username:
+            raise HTTPException(status_code=400, detail="Username already taken")
     
     hashed_pw = get_password_hash(user_data.password)
 
